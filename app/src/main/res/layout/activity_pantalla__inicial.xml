@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.ei1057.appcliente.Pantalla_Inicial">
+    tools:context="com.example.ei1057.appcliente.Pantalla_InicialActivity">
 
     <Button
         android:id="@+id/SearchButton"
