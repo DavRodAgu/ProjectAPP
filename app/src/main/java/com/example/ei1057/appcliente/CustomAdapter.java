@@ -2,6 +2,7 @@ package com.example.ei1057.appcliente;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.support.annotation.NonNull;
@@ -10,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Filter;
@@ -23,7 +23,7 @@ import java.util.List;
 //public class CustomAdapter extends ArrayAdapter<DataModel> {
 public class CustomAdapter extends ArrayAdapter<DataModel> implements Filterable {
 
-    private Activity context;
+    //private Activity context;
     private ArrayList<DataModel> data; //original data
     private ArrayList<DataModel> mdata;      // displayed data
     private List<ScanResult> results;
@@ -98,8 +98,6 @@ public class CustomAdapter extends ArrayAdapter<DataModel> implements Filterable
             holder.guideID = (TextView)v.findViewById(R.id.GuideName);
             holder.signal = (ImageView) v.findViewById(R.id.Signal);
 
-
-
             Log.e(TAG, "Creating ListView");
 
             v.setTag(holder);
@@ -112,7 +110,7 @@ public class CustomAdapter extends ArrayAdapter<DataModel> implements Filterable
         holder.guideID.setText(datum.getGuideId());
         //Hay que para cada wifi comprobar el RSSI
         Log.e(TAG, "Llega aqui" + "Tamaño results: " + results.size());
-        for(ScanResult result : results) {
+        /*for(ScanResult result : results) {
             Log.e(TAG, "Llega aqui" + "Tamaño results: " + results.size());
             if(result.SSID.equals(datum.getSSID())) {
                 Log.e(TAG, "Llega aqui");
@@ -130,7 +128,7 @@ public class CustomAdapter extends ArrayAdapter<DataModel> implements Filterable
                 holder.signal.setImageResource(R.mipmap.ic_wifi_low);
                 Log.e(TAG, "Llega aqui 4");
             }
-        }
+        }*/
         Log.e(TAG, "Created");
 
         return v;

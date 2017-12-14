@@ -2,18 +2,25 @@ package com.example.ei1057.appcliente;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -34,10 +41,14 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
     Button searchButton;
     EditText IDguide;
     ListView ListGuides;
+    TextView state;
     ArrayList<DataModel> data;
     CustomAdapter customAdapter;
     Session sessionClient;
     List<ScanResult> scan;
+
+    WifiManager wifiManager;
+    BroadcastReceiver receiver;
 
     private DatabaseReference dbref;
 
@@ -46,35 +57,58 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantalla__inicial);
 
+        /*final IntentFilter filter = new IntentFilter();
+        filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);*/
+
+        IDguide = (EditText) findViewById(R.id.IDguide);
+        searchButton = (Button) findViewById(R.id.SearchButton);
+        ListGuides = (ListView) findViewById(R.id.ListGuides);
+        state = (TextView) findViewById(R.id.State);
+
         String service = Context.WIFI_SERVICE;
         final WifiManager wifiManager = (WifiManager) getSystemService(service);
-
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-
-
 
         //Check whether wifi is enable or not
         if (!wifiManager.isWifiEnabled()){
             if (wifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLING){
-                Toast.makeText(getApplicationContext(), "Wifi desactivada. Habilitando wifi.", Toast.LENGTH_LONG).show();
-                wifiManager.setWifiEnabled(true);
-                //Log.e("MyWifiApplicationLOG","Activating wifi");
+                /*Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                startActivityForResult(intent, 1);*/
+                new AlertDialog.Builder(this)
+                        .setMessage("Activate wifi?") //Ask to activate wifi
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                wifiManager.setWifiEnabled(true);
+                                state.setText("Wifi On");
+                                Log.e("MyWifiApplicationLOG", "Activating wifi");
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                state.setText("Wifi Off");
+                            }
+                        })
+                        .show();
             }
+        } else {
+            state.setText("Wifi On");
         }
 
-        /*
-        wifiManager.startScan();
-
-        final BroadcastReceiver receiver = new BroadcastReceiver() {
-            @Override public void onReceive(Context context, Intent intent) {
-                //wifiManager.startScan();
-                scan = wifiManager.getScanResults();
+        //Check for changes in the wifi state
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //Toast.makeText(Pantalla_Inicial.this, "Wifi State Changed!", Toast.LENGTH_SHORT).show();
+                if (wifiManager.isWifiEnabled()) {
+                    state.setText("Wifi On");
+                } else {
+                    state.setText("Wifi Off");
+                }
             }
-        }; */
+        };
+        registerReceiver(receiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
 
-
+        //Scan
         /*registerReceiver(new BroadcastReceiver()
         {
             @Override
@@ -86,11 +120,6 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
                 }
             }
         }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)); */
-
-        IDguide = (EditText) findViewById(R.id.IDguide);
-        searchButton = (Button) findViewById(R.id.SearchButton);
-        ListGuides = (ListView) findViewById(R.id.ListGuides);
-
 
         IDguide.addTextChangedListener(new TextWatcher() {
             @Override
@@ -121,7 +150,6 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
         searchButton.setOnClickListener(new View.OnClickListener(){ //Se podria utilizar un Budler en lugar de un AsyncTask
             public void onClick(View v) {
                 customAdapter.clear();
-                //Create asynctask
                 AsyncThread task = new AsyncThread();
                 task.execute();
             }
@@ -146,6 +174,26 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+    }
+
+    /*
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(getApplicationContext(), "Wifi desactivada. Habilitando wifi.", Toast.LENGTH_LONG).show();
+                wifiManager.setWifiEnabled(true);
+                state.setText("Wifi On");
+                Log.e("MyWifiApplicationLOG", "Activating wifi");
+            } else {
+                state.setText("Wifi Off");
+            }
+        }
+    }*/
 
     @Override
     public void finish(Session session) {
@@ -199,10 +247,10 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
         }
 
         protected void onPostExecute(Boolean result) {
-            if(result) {
+            /*if(result) {
                 Toast.makeText(Pantalla_Inicial.this, "Tarea finalizada!",
                         Toast.LENGTH_SHORT).show();
-            }
+            }*/
         }
 
         protected void onCancelled() {
