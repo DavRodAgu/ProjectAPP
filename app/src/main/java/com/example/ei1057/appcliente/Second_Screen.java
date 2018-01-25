@@ -10,17 +10,11 @@ import android.support.design.widget.TabLayout;
 
 
 public class Second_Screen  extends AppCompatActivity{
-    //private ViewPager viewPager;
-    //private PageAdapter mAdapter;
-    //Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewpager);
-
-        /*toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);*/
 
         ViewPager viewPager = (ViewPager) findViewById(R.id.pager);
         PageAdapter mAdapter = new PageAdapter(getSupportFragmentManager());

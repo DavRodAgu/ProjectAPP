@@ -48,7 +48,8 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
     List<ScanResult> scan;
 
     WifiManager wifiManager;
-    BroadcastReceiver receiver;
+    private BroadcastReceiver receiver;
+    private BroadcastReceiver receiver1;
 
     private DatabaseReference dbref;
 
@@ -57,9 +58,9 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pantalla__inicial);
 
-        /*final IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
-        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);*/
+        final IntentFilter filter = new IntentFilter();
+        //filter.addAction(WifiManager.RSSI_CHANGED_ACTION);
+        filter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
 
         IDguide = (EditText) findViewById(R.id.IDguide);
         searchButton = (Button) findViewById(R.id.SearchButton);
@@ -98,7 +99,6 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //Toast.makeText(Pantalla_Inicial.this, "Wifi State Changed!", Toast.LENGTH_SHORT).show();
                 if (wifiManager.isWifiEnabled()) {
                     state.setText("Wifi On");
                 } else {
@@ -106,20 +106,20 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
                 }
             }
         };
-        registerReceiver(receiver, new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+        registerReceiver(receiver, new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
-        //Scan
-        /*registerReceiver(new BroadcastReceiver()
-        {
+        receiver1 = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context c, Intent intent)
-            {
-                scan.addAll(wifiManager.getScanResults());
+            public void onReceive(Context c, Intent intent) {
+                //scan.addAll(wifiManager.getScanResults());
+                scan = wifiManager.getScanResults();
                 for(ScanResult result : scan) {
                     Toast.makeText(getApplicationContext(), " RSSI: " + result.level + "  SSID: " + result.SSID, Toast.LENGTH_LONG).show();
                 }
             }
-        }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)); */
+        };
+        registerReceiver(receiver1, filter);
+        wifiManager.startScan();
 
         IDguide.addTextChangedListener(new TextWatcher() {
             @Override
@@ -161,9 +161,9 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
                 DataModel dataModel= data.get(position);
 
 
-                Toast toast = Toast.makeText(getApplicationContext(), "Click ListItem Number: " + position + "Name: "
+                /*Toast toast = Toast.makeText(getApplicationContext(), "Click ListItem Number: " + position + "Name: "
                         + dataModel.getGuideId(), Toast.LENGTH_SHORT);
-                toast.show();
+                toast.show();*/
 
 
                 LoginDialog login = LoginDialog.newInstance("DialogLogin");
@@ -178,6 +178,7 @@ public class Pantalla_Inicial extends AppCompatActivity implements LoginDialog.O
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(receiver);
+        unregisterReceiver(receiver1);
     }
 
     /*
